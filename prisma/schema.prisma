@@ -1,0 +1,15 @@
+datasource db {
+  provider = "sqlite"
+  url = "file:./db.sqlite"
+}
+
+generator client {
+  provider = "prisma-client-py"
+  interface = "asyncio"
+}
+
+model Product {
+  id      Int     @id @default(autoincrement())
+  sku     String  @unique
+  price   Float
+}
