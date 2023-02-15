@@ -1,6 +1,6 @@
-from typing import Union
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from prisma.errors import UniqueViolationError
 
 from src.prisma import prisma
 
@@ -12,17 +12,21 @@ class Product(BaseModel):
 router = APIRouter()
 
 @router.get("/product/", tags=["product"])
-async def read_users():
+async def read_products():
   products = await prisma.product.find_many()
   print("products", products)
 
   return products
 
 @router.post("/product/", tags=["product"])
-async def new_user(product: Product):
-  product = await prisma.product.create({
-    "sku": product.sku,
-    "price": product.price
-  })
+async def new_product(product: Product):
+  try:
+    product = await prisma.product.create({
+      "sku": product.sku,
+      "price": product.price
+    })
+
+  except UniqueViolationError:
+    raise HTTPException(status_code=400, detail="A product with this SKU already exists.")
 
   return product

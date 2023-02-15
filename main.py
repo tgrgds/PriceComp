@@ -6,7 +6,11 @@ from pydantic import BaseModel
 from src.api import api
 from src.prisma import prisma
 
-app = FastAPI()
+app = FastAPI(
+  title="PriceComp",
+  version="0.0.1"
+)
+
 app.include_router(api, prefix="/api")
 
 @app.on_event("startup")
@@ -19,7 +23,7 @@ async def shutdown():
 
 @app.get("/")
 def read_root():
-  return {"version": "0.1.0"}
+  return {"version": "0.0.1"}
 
 # class Item(BaseModel):
 #   name: str
