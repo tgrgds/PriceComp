@@ -2,7 +2,7 @@ import requests
 from json import dumps
 from urllib.parse import urlencode
 
-from src.scraper.scraper import Scraper
+from src.scraper import Scraper
 from src.util.brands import MUSIPOS_BRANDS
 
 class BetterScraper(Scraper):
@@ -52,9 +52,6 @@ class BetterScraper(Scraper):
         break
 
       result = req.json()
-
-      # if len(result["results"][0]["hits"]) == 0:
-      #   print(result)
 
       if len(result["results"][0]["hits"]) > 0:
         for product in result["results"][0]["hits"]:

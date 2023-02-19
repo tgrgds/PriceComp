@@ -2,8 +2,7 @@ import requests
 from json import dumps
 from urllib.parse import urlencode
 
-from src.scraper.scraper import Scraper
-from src.util.brands import MUSIPOS_BRANDS
+from src.scraper import Scraper
 
 class MannysScraper(Scraper):
   _base_url = "https://search.soundbay.com.au/multi_search"
@@ -54,8 +53,6 @@ class MannysScraper(Scraper):
       if not req.ok:
         print(f"Request halted with status {req.status_code}")
         break
-
-      # dump(req.json(), open("data/mannys.json", "w"), indent=2)
 
       result = req.json()
       result = result["results"][0]
