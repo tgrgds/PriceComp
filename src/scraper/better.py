@@ -3,6 +3,7 @@ from json import dumps
 from urllib.parse import urlencode
 
 from src.scraper import Scraper
+from src.type import ScraperData
 from src.util.brands import MUSIPOS_BRANDS
 
 class BetterScraper(Scraper):
@@ -14,7 +15,7 @@ class BetterScraper(Scraper):
   }
 
   @classmethod
-  def search_request(cls, query: str, page_limit: int = 1000):
+  def search_request(cls, query: str, page_limit: int = 1000) -> ScraperData:
     data = {
       "hits": 0,
       "products": []
@@ -82,33 +83,36 @@ class BetterScraper(Scraper):
   # so this splits the queries up into several searches using every brand in musipos
   @classmethod
   def scrape_all(cls):
-    data = {
-      "totalHits": 0,
-      "hits": {}, # hits per brand
-      "products": []
-    }
-
     # collect list of skus already added to reduce overlap
     # with overlap we get 104877 results :O
     skus = []
 
     for brand in MUSIPOS_BRANDS:
       print(f"Requesting brand {brand}...")
-      res = cls.search_request(brand)
 
-      # this might be VERY SLOW
-      prods = [p for p in res["products"] if p["sku"] not in skus]
-      hits = len(prods)
+      data = cls.search_request(brand)
 
-      print(f"{res['hits']} hits ({res['hits'] - hits} duplicates)")
+      products = []
+
+      # get rid of the duplicate skus
+      for prod in filter(lambda p: p["sku"] not in skus, data["products"]):
+        products.append(prod)
+
+      new_hits = len(products)
+
+      print(f"{data['hits']} hits - {data['hits'] - new_hits} duplicates = {new_hits} products added")
+
+      # skip if no products to add
+      if new_hits == 0:
+        continue
 
       # add to the list of SKUs that have been put into the results
       # so we don't get duplicates
-      skus += [p["sku"] for p in res["products"] if p["sku"] not in skus]
+      skus += [p["sku"] for p in products if p["sku"] not in skus]
 
-      data["hits"][brand] = hits
-      data["totalHits"] += hits
+      yield {
+        "hits": new_hits,
+        "products": products
+      }
 
-      data["products"] += prods
-
-    return data
+    #return data

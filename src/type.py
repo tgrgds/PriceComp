@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Union
 
 class Product(BaseModel):
   name: str
@@ -8,6 +9,5 @@ class Product(BaseModel):
   in_stock: bool
 
 class ScraperData(BaseModel):
-  totalHits: int
-  hits: dict[str, int]
+  hits: int
   products: list[Product]

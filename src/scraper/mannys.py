@@ -9,16 +9,14 @@ class MannysScraper(Scraper):
 
   @classmethod
   def search_query(cls, query: str):
-    data = {
-      "totalHits": 0,
-      "hits": 0,
-      "products": []
-    }
-
     page = 1
-    product_count = 0
 
     while True:
+      data = {
+        "hits": 0,
+        "products": []
+      }
+
       params = {
         "searches": [
           {
@@ -45,7 +43,7 @@ class MannysScraper(Scraper):
       req = requests.post(
         cls._base_url,
         params={
-        "x-typesense-api-key": "hwF2Qt89KwjgwvwjcNcB0ALMuKa2vvNJ"
+          "x-typesense-api-key": "hwF2Qt89KwjgwvwjcNcB0ALMuKa2vvNJ"
         },
         data=dumps(params)
       )
@@ -56,7 +54,6 @@ class MannysScraper(Scraper):
 
       result = req.json()
       result = result["results"][0]
-      print(len(result["hits"]))
 
       if len(result["hits"]) > 0:
         for res in result["hits"]:
@@ -69,19 +66,17 @@ class MannysScraper(Scraper):
             "price": product["price"],
             "in_stock": product["stock"] == "in stock"
           })
-
-          # this could just be len(data["products"]) instead lol
-          product_count += 1
       
       else:
         break
+
+      data["hits"] = len(result["hits"])
+
+      yield data
       
       page += 1
-
-    data["hits"] = product_count
-
-    return data
   
   @classmethod
   def scrape_all(cls):
-    return cls.search_query("*")
+    for data in cls.search_query("*"):
+      yield data

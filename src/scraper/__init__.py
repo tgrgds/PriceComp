@@ -10,7 +10,9 @@ class Scraper:
 
   @classmethod
   def export_all_json(cls, path: str) -> ScraperData:
-    data = cls.scrape_all()
+    # this defeats the purpose of yielding all the results in the first place
+    # TODO: fix this
+    data = [[p for p in d["products"]] for d in cls.scrape_all()][0]
 
     with open(path, "w") as file:
       dump(data, file, indent=2)
@@ -21,20 +23,18 @@ class Scraper:
 
   @classmethod
   def export_all_csv(cls, path: str):
-    data = cls.scrape_all()
-
     with open(path, "w", newline="") as csvfile:
       writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
       
       writer.writerow(["sku", "name", "url", "price", "in_stock"])
 
-      for product in data["products"]:
-        writer.writerow([
-          product["sku"],
-          product["name"],
-          product["url"],
-          product["price"],
-          product["in_stock"]
-        ])
+      for data in cls.scrape_all():
+        rows = [[product["sku"],
+            product["name"],
+            product["url"],
+            product["price"],
+            product["in_stock"]] for product in data["products"]]
+
+        writer.writerows(rows)
     
     return data
