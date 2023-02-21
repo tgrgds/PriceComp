@@ -6,10 +6,14 @@ datasource db {
 generator client {
   provider = "prisma-client-py"
   interface = "asyncio"
+  recursive_type_depth = 5
 }
 
 model Product {
-  id      Int     @id @default(autoincrement())
-  sku     String  @unique
-  price   Float
+  id        String @id @unique // combination of store_sku
+  sku       String
+  store_id  String
+  url       String
+  price     Float
+  in_stock  Boolean
 }
