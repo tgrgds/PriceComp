@@ -1,6 +1,5 @@
 import requests
 from json import dumps
-from urllib.parse import urlencode
 
 from src.scraper import Scraper
 

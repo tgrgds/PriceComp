@@ -11,11 +11,11 @@ class Product(BaseModel):
 
 router = APIRouter()
 
-@router.get("/product/{sku}", tags=["product"])
+@router.get("/product/sku/{sku}", tags=["product"])
 async def get_product(sku: str):
   products = await prisma.product.find_many(
     where={
-      "sku": { "search": sku }
+      "sku": sku
     }
   )
   print("products", products)

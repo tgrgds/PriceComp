@@ -7,15 +7,17 @@ from src.prisma import prisma
 from src.scraper import Scraper
 from src.scraper.better import BetterScraper
 from src.scraper.mannys import MannysScraper
+from src.scraper.haworth import HaworthScraper
 
 router = APIRouter()
 
 class SiteName(str, Enum):
   better = "better"
   mannys = "mannys"
+  haworth = "haworth"
 
-@router.post("/scraper/{site_name}", tags=["scraper"])
-async def scrape_one(site_name: SiteName):
+@router.post("/scraper/{site_name}", tags=["scraper"], description="Get all data from a competitor site and update the database.")
+async def scrape_site(site_name: SiteName):
   scraper: Scraper = None
 
   # todo: make this better when more scrapers come in
@@ -24,6 +26,9 @@ async def scrape_one(site_name: SiteName):
 
   elif site_name == SiteName.mannys:
     scraper = MannysScraper
+
+  elif site_name == SiteName.haworth:
+    scraper = HaworthScraper
 
   else:
     raise HTTPException(status_code=400, detail="The requested site does not exist.")
@@ -52,17 +57,3 @@ async def scrape_one(site_name: SiteName):
             "update": data
           }
         )
-
-@router.get("/scraper/better", tags=["scraper"])
-async def better_urls():
-  result = BetterScraper.scrape_all()
-
-  dump(result, open("better_all.json", "w"), indent=2)
-
-  return result
-
-@router.post("/scraper/better/csv", tags=["scraper"])
-async def export_better_csv():
-  BetterScraper.export_all_csv("data/better_all.csv")
-
-  return FileResponse("data/better_all.csv")
