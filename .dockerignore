@@ -1,0 +1,7 @@
+# database
+/prisma/db.sqlite
+/prisma/db.sqlite-journal
+
+data/
+
+__pycache__/
