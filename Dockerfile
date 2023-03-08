@@ -1,21 +1,3 @@
-FROM python:3.9
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-COPY Pipfile Pipfile.lock ./
-
-RUN python -m pip install --upgrade pip
-RUN pip install pipenv && pipenv install --system --deploy
-
-WORKDIR /app
-
-
-
-COPY . /app
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
-
 FROM python:3.9-slim as base
 
 # Setup env
@@ -43,15 +25,10 @@ FROM base AS runtime
 COPY --from=python-deps /.venv /.venv
 ENV PATH="/.venv/bin:$PATH"
 
-# Create and switch to a new user
-# RUN useradd --create-home appuser
-# WORKDIR /home/appuser
-# USER appuser
-
 # Install application into container
 COPY . .
 
 RUN prisma generate && prisma migrate deploy
 
 # Run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--proxy-headers"]
