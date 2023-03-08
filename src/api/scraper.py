@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
-from enum import Enum
 from json import dump
 
 from src.prisma import prisma
@@ -8,13 +7,9 @@ from src.scraper import Scraper
 from src.scraper.better import BetterScraper
 from src.scraper.mannys import MannysScraper
 from src.scraper.haworth import HaworthScraper
+from src.type import SiteName
 
 router = APIRouter()
-
-class SiteName(str, Enum):
-  better = "better"
-  mannys = "mannys"
-  haworth = "haworth"
 
 @router.post("/scraper/{site_name}", tags=["scraper"], description="Get all data from a competitor site and update the database.")
 async def scrape_site(site_name: SiteName):

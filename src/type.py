@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Union
+from enum import Enum
 
 class Product(BaseModel):
   id: Union[str, None] # combination of store_sku
@@ -12,3 +13,8 @@ class Product(BaseModel):
 class ScraperData(BaseModel):
   hits: int
   products: list[Product]
+
+class SiteName(str, Enum):
+  better = "better"
+  mannys = "mannys"
+  haworth = "haworth"

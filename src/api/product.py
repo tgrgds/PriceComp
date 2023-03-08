@@ -1,8 +1,10 @@
 from fastapi import APIRouter, HTTPException
+from typing import Union
 from pydantic import BaseModel
 from prisma.errors import UniqueViolationError
 
 from src.prisma import prisma
+from src.type import SiteName
 
 class Product(BaseModel):
   # id: int
@@ -11,33 +13,60 @@ class Product(BaseModel):
 
 router = APIRouter()
 
-@router.get("/product/sku/{sku}", tags=["product"])
-async def get_product(sku: str):
-  products = await prisma.product.find_many(
-    where={
-      "sku": sku
+# TODO: merge this with /product/{store}/search with "store" query param
+@router.get("/product/search/{search}", tags=["product"])
+async def search_products(search: str, strict: bool = False, store: Union[SiteName, None] = None):
+  # TODO: figure out how to sort by relevance
+  # https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting#sort-by-relevance-postgresql
+
+  # Default, non-strict search
+  # loosely compares searchterm with sku and the name contained in the url
+  query = {
+    "OR": [
+      {
+        "sku": { "contains": search },
+      },
+      {
+        # i don't think we need a name field just for searching
+        # as the name is contained in the url
+        "url": { "contains": search.replace(" ", "-") },
+      }
+    ]
+  }
+
+  if strict:
+    query = { 
+      "sku": search,
     }
-  )
-  print("products", products)
+
+  products = await prisma.product.find_many(where=query)
 
   return products
 
-@router.get("/product/search/{search}", tags=["product"])
-async def search_products(search: str):
-  # TODO: figure out how to sort by relevance
-  # https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting#sort-by-relevance-postgresql
+# same as above but with specific "store" param
+# TODO: merge with above func with a query param instead
+@router.get("/product/{store}/search/{search}", tags=["product"])
+async def search_products(search: str, store: SiteName, strict: bool = False):
+  query = {
+    "OR": [
+      {
+        "sku": { "contains": search },
+      },
+      {
+        "url": { "contains": search.replace(" ", "-") },
+      }
+    ]
+  }
+
+  if strict:
+    query = { 
+      "sku": search,
+    }
+
   products = await prisma.product.find_many(
     where={
-      "OR": [
-        {
-          "sku": { "contains": search }
-        },
-        {
-          # i don't think we need a name field just for searching
-          # as the name is contained in the url
-          "url": { "contains": search.replace(" ", "-") }
-        }
-      ]
+      **query,
+      "store_id": store
     }
   )
 
