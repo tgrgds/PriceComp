@@ -5,6 +5,7 @@ from math import ceil
 from src.scraper import Scraper
 
 class HaworthScraper(Scraper):
+  id = "haworth"
   _base_url = "https://xf4jznzbcrkyscz86354vplw-fast.searchtap.net/v2"
 
   @classmethod

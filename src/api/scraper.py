@@ -1,5 +1,4 @@
-from fastapi import APIRouter, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, HTTPException, BackgroundTasks
 from json import dump
 
 from src.prisma import prisma
@@ -11,8 +10,39 @@ from src.type import SiteName
 
 router = APIRouter()
 
-@router.post("/scraper/{site_name}", tags=["scraper"], description="Get all data from a competitor site and update the database.")
-async def scrape_site(site_name: SiteName):
+# site_id's go here to keep track of background tasks
+# so we don't double up on scrapers
+scraper_queue = []
+
+async def chunk_scrape(scraper: Scraper):
+  for chunk in scraper.scrape_all():
+    async with prisma.batch_() as batcher:
+      for product in chunk["products"]:
+        data = {
+          "id": f"{scraper.id}_{product['sku'].replace(' ', '-').lower()}",
+          "store_id": scraper.id,
+          "sku": product["sku"],
+          "url": product["url"],
+          "price": product["price"],
+          "in_stock": product["in_stock"]
+        }
+
+        print(data)
+
+        batcher.product.upsert(
+          where={
+            "id": f"{scraper.id}_{product['sku'].replace(' ', '-').lower()}"
+          },
+          data={
+            "create": data,
+            "update": data
+          }
+        )
+  
+  scraper_queue.remove(scraper.id)
+
+@router.post("/scraper/{site_name}", status_code=201, tags=["scraper"], description="Get all data from a competitor site and update the database.")
+async def scrape_site(site_name: SiteName, background_tasks: BackgroundTasks):
   scraper: Scraper = None
 
   # todo: make this better when more scrapers come in
@@ -27,28 +57,13 @@ async def scrape_site(site_name: SiteName):
 
   else:
     raise HTTPException(status_code=400, detail="The requested site does not exist.")
+
+  if (site_name not in scraper_queue):
+    # TODO: exception handling
+    background_tasks.add_task(chunk_scrape, scraper)
+    scraper_queue.append(site_name)
   
-  # TODO: exception handling
-  for chunk in scraper.scrape_all():
-    async with prisma.batch_() as batcher:
-      for product in chunk["products"]:
-        data = {
-          "id": f"{site_name.value}_{product['sku'].replace(' ', '-').lower()}",
-          "store_id": site_name.value,
-          "sku": product["sku"],
-          "url": product["url"],
-          "price": product["price"],
-          "in_stock": product["in_stock"]
-        }
+  else:
+    raise HTTPException(status_code=400, detail="Scraper already running.")
 
-        print(data)
-
-        batcher.product.upsert(
-          where={
-            "id": f"{site_name.value}_{product['sku'].replace(' ', '-').lower()}"
-          },
-          data={
-            "create": data,
-            "update": data
-          }
-        )
+  return { "message": "Background task scheduled" }

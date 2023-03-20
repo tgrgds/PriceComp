@@ -4,6 +4,8 @@ from json import dump
 from src.type import ScraperData
 
 class Scraper:
+  id = "base"
+
   @classmethod
   def scrape_all(cls) -> ScraperData:
     raise NotImplementedError

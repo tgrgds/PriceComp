@@ -7,6 +7,7 @@ from src.type import ScraperData
 from src.util.brands import MUSIPOS_BRANDS
 
 class BetterScraper(Scraper):
+  id = "better"
   _base_url = "https://g6qbk0086l-dsn.algolia.net"
   _req_headers = {
     "x-algolia-api-key": "MGE2NjEzZjlmNGE4ZTEwMTQyMjc1MGRhNzkwMTcxOTU1ZDllOTcyNDllMWNjZTkxZjE0YmJkN2ZmYjM0ODMxNHRhZ0ZpbHRlcnM9",

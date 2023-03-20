@@ -4,6 +4,7 @@ from json import dumps
 from src.scraper import Scraper
 
 class MannysScraper(Scraper):
+  id = "mannys"
   _base_url = "https://search.soundbay.com.au/multi_search"
 
   @classmethod
