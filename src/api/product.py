@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import Union
 from pydantic import BaseModel
 from prisma.errors import UniqueViolationError
 
 from src.prisma import prisma
+from src.auth import api_key_auth
 from src.type import SiteName
 
 class Product(BaseModel):
@@ -14,7 +15,7 @@ class Product(BaseModel):
 router = APIRouter()
 
 # TODO: merge this with /product/{store}/search with "store" query param
-@router.get("/product/search/{search}", tags=["product"])
+@router.get("/product/search/{search}", dependencies=[Depends(api_key_auth)], tags=["product"])
 async def search_products(search: str, strict: bool = False, store: Union[SiteName, None] = None):
   # TODO: figure out how to sort by relevance
   # https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting#sort-by-relevance-postgresql
@@ -45,7 +46,7 @@ async def search_products(search: str, strict: bool = False, store: Union[SiteNa
 
 # same as above but with specific "store" param
 # TODO: merge with above func with a query param instead
-@router.get("/product/{store}/search/{search}", tags=["product"])
+@router.get("/product/{store}/search/{search}", dependencies=[Depends(api_key_auth)], tags=["product"])
 async def search_products(search: str, store: SiteName, strict: bool = False):
   query = {
     "OR": [
@@ -72,15 +73,15 @@ async def search_products(search: str, store: SiteName, strict: bool = False):
 
   return products
 
-@router.post("/product/", tags=["product"])
-async def new_product(product: Product):
-  try:
-    product = await prisma.product.create({
-      "sku": product.sku,
-      "price": product.price
-    })
+# @router.post("/product/", tags=["product"])
+# async def new_product(product: Product):
+#   try:
+#     product = await prisma.product.create({
+#       "sku": product.sku,
+#       "price": product.price
+#     })
 
-  except UniqueViolationError:
-    raise HTTPException(status_code=400, detail="A product with this SKU already exists.")
+#   except UniqueViolationError:
+#     raise HTTPException(status_code=400, detail="A product with this SKU already exists.")
 
-  return product
+#   return product

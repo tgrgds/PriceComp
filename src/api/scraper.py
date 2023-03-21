@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
-from json import dump
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 
 from src.prisma import prisma
+from src.auth import api_key_auth
 from src.scraper import Scraper
 from src.scraper.better import BetterScraper
 from src.scraper.mannys import MannysScraper
@@ -41,7 +41,8 @@ async def chunk_scrape(scraper: Scraper):
   
   scraper_queue.remove(scraper.id)
 
-@router.post("/scraper/{site_name}", status_code=201, tags=["scraper"], description="Get all data from a competitor site and update the database.")
+@router.post("/scraper/{site_name}", status_code=201, dependencies=[Depends(api_key_auth)],
+             tags=["scraper"], description="Get all data from a competitor site and update the database.")
 async def scrape_site(site_name: SiteName, background_tasks: BackgroundTasks):
   scraper: Scraper = None
 

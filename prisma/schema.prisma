@@ -17,3 +17,8 @@ model Product {
   price     Float
   in_stock  Boolean
 }
+
+model User {
+  hash        String @id @unique
+  created_at  DateTime @default(now())
+}
