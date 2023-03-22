@@ -68,3 +68,11 @@ async def scrape_site(site_name: SiteName, background_tasks: BackgroundTasks):
     raise HTTPException(status_code=400, detail="Scraper already running.")
 
   return { "message": "Background task scheduled" }
+
+# List all available sites
+# Saves having to update a sitelist in cronjob lol
+@router.get("/scraper/list", dependencies=[Depends(api_key_auth)])
+async def list_sites():
+  sites = [site.value for site in SiteName]
+
+  return sites

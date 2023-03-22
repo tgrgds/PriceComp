@@ -73,6 +73,18 @@ async def search_products(search: str, store: SiteName, strict: bool = False):
 
   return products
 
+# Get all products from the given store
+# Useful for making reports
+@router.get("/product/{store}/all", dependencies=[Depends(api_key_auth)], tags=["product"])
+async def get_all_products(store: SiteName):
+  products = await prisma.product.find_many(
+    where={
+      "store_id": store
+    }
+  )
+
+  return products
+
 # @router.post("/product/", tags=["product"])
 # async def new_product(product: Product):
 #   try:

@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
-from uuid import uuid4, UUID
+from uuid import uuid4
 from hashlib import sha256
 
 from src.prisma import prisma
