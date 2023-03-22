@@ -156,5 +156,6 @@ cython_debug/
 /prisma/db.sqlite
 /prisma/db.sqlite-journal
 
-# Scraper output folder
+# Scraper/data output folders
 data
+csv
