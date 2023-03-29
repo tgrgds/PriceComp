@@ -9,6 +9,7 @@ uvicorn = {extras = ["standard"], version = "*"}
 prisma = "*"
 requests = "*"
 bs4 = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

@@ -2,9 +2,9 @@ import requests
 from json import dumps
 from math import ceil
 
-from src.scraper import Scraper
+from . import scraper
 
-class HaworthScraper(Scraper):
+class HaworthScraper(scraper.Scraper):
   id = "haworth"
   _base_url = "https://xf4jznzbcrkyscz86354vplw-fast.searchtap.net/v2"
 

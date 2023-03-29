@@ -2,11 +2,11 @@ import requests
 from json import dumps
 from urllib.parse import urlencode
 
-from src.scraper import Scraper
+from . import scraper
 from src.type import ScraperData
 from src.util.brands import MUSIPOS_BRANDS
 
-class BetterScraper(Scraper):
+class BetterScraper(scraper.Scraper):
   id = "better"
   _base_url = "https://g6qbk0086l-dsn.algolia.net"
   _req_headers = {

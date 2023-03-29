@@ -2,10 +2,7 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 
 from src.prisma import prisma
 from src.auth import api_key_auth
-from src.scraper import Scraper
-from src.scraper.better import BetterScraper
-from src.scraper.mannys import MannysScraper
-from src.scraper.haworth import HaworthScraper
+from src.scraper import Scraper, SCRAPERS
 from src.type import SiteName
 
 router = APIRouter()
@@ -44,19 +41,10 @@ async def chunk_scrape(scraper: Scraper):
 @router.post("/scraper/{site_name}", status_code=201, dependencies=[Depends(api_key_auth)],
              tags=["scraper"], description="Get all data from a competitor site and update the database.")
 async def scrape_site(site_name: SiteName, background_tasks: BackgroundTasks):
-  scraper: Scraper = None
-
-  # todo: make this better when more scrapers come in
-  if site_name == SiteName.better:
-    scraper = BetterScraper
-
-  elif site_name == SiteName.mannys:
-    scraper = MannysScraper
-
-  elif site_name == SiteName.haworth:
-    scraper = HaworthScraper
-
-  else:
+  
+  try:
+    scraper = SCRAPERS[site_name]
+  except KeyError:
     raise HTTPException(status_code=400, detail="The requested site does not exist.")
 
   if (site_name not in scraper_queue):
