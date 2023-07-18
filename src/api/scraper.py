@@ -15,6 +15,7 @@ async def chunk_scrape(scraper: Scraper):
   for chunk in scraper.scrape_all():
     async with prisma.batch_() as batcher:
       for product in chunk["products"]:
+        print(product)
         data = {
           "id": f"{scraper.id}_{product['sku'].replace(' ', '-').lower()}",
           "store_id": scraper.id,
@@ -36,7 +37,10 @@ async def chunk_scrape(scraper: Scraper):
           }
         )
   
-  scraper_queue.remove(scraper.id)
+  try:
+    scraper_queue.remove(scraper.id)
+  except:
+    pass
 
 @router.post("/scraper/{site_name}", status_code=201, dependencies=[Depends(api_key_auth)],
              tags=["scraper"], description="Get all data from a competitor site and update the database.")
