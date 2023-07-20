@@ -28,29 +28,12 @@ class HaworthScraper(scraper.Scraper):
         "country": "AU",
         "locale": "en",
         "skip": 250 * page,
-        # "count": 250,
-        # "query": query,
-        # "collection": "9L5M8FQRTBHCPWU4PU4I2VII",
-        # "facetCount": 100,
-        # "fields": ["*"],
-        # "filter": "priorityScore >= 0 AND publishedTimestamp < 1677022946276 AND publishedTimestamp > 0",
-        # "geo": {},
-        # "groupCount": -1,
-        # "highlightFields": [],
-        # "numericFacetFilters": { "price": ["[0,2147483647]"] },
-        # "searchFields": ["title", "description", "collections", "tags", "productType", "vendor", "variants.sku"],
       }
-
-      # ?q=&apiKey=3877fc75-49a9-44e4-9394-12e6916904a7&sort=bestselling&take=6&country=AU&locale=en
 
       print(f"Getting page {page}/{ceil(total_hits / 250)}...")
 
       req = requests.post(
         cls._base_url,
-        # headers={
-        #   "authorization": "Bearer MEEDXH2Q5KN91ADWFHY7CF97",
-        #   "Content-Type": "application/json"
-        # },
         params=params
       )
 

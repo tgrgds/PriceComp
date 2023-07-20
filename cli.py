@@ -16,5 +16,4 @@ async def run():
     await prisma.connect()
     await scraper.chunk_scrape(SCRAPERS[args.scraper])
 
-
 asyncio.run(run())

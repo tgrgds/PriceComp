@@ -18,3 +18,4 @@ class SiteName(str, Enum):
   better = "better"
   mannys = "mannys"
   haworth = "haworth"
+  soundseasy = "soundseasy"
