@@ -1,5 +1,4 @@
 import requests
-from json import dumps
 from math import ceil
 
 from . import scraper
