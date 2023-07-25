@@ -21,3 +21,4 @@ class SiteName(str, Enum):
   soundseasy = "soundseasy"
   turra = "turra"
   derringers = "derringers"
+  mooloolaba = "mooloolaba"
