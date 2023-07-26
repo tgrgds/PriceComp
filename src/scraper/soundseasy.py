@@ -1,5 +1,4 @@
 import requests
-from json import dumps, loads
 from time import sleep
 from math import ceil
 from bs4 import BeautifulSoup
@@ -83,14 +82,6 @@ class SoundsEasyScraper(scrapers.Scraper):
         except Exception as e:
           print(f"Skipping due to error: {e}")
           pass
-
-      # for product in results["results"]:
-      #   data["products"].append({
-      #     "name": product["title"],
-      #     # "sku": 
-      #     "url": "https://soundseasy.com.au" + product["url"],
-      #     "price": int(product["raw_price"]) / 100
-      #   })
 
       yield data
 
