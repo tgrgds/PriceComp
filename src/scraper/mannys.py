@@ -1,9 +1,9 @@
 import requests
 from json import dumps
 
-from . import scraper
+from . import scrapers
 
-class MannysScraper(scraper.Scraper):
+class MannysScraper(scrapers.Scraper):
   id = "mannys"
   _base_url = "https://search.soundbay.com.au/multi_search"
 

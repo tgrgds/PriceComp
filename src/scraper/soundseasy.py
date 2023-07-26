@@ -4,9 +4,9 @@ from time import sleep
 from math import ceil
 from bs4 import BeautifulSoup
 
-from . import scraper
+from . import scrapers
 
-class SoundsEasyScraper(scraper.Scraper):
+class SoundsEasyScraper(scrapers.Scraper):
   id = "soundseasy"
   _base_url = "https://www.soundseasy.com.au/search"
   _last_wait = 5

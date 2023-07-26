@@ -1,9 +1,9 @@
 import requests
 from math import ceil
 
-from . import scraper
+from . import scrapers
 
-class HaworthScraper(scraper.Scraper):
+class HaworthScraper(scrapers.Scraper):
   id = "haworth"
   _base_url = "https://svc-5-usf.hotyon.com/instantsearch"
 
@@ -63,7 +63,6 @@ class HaworthScraper(scraper.Scraper):
       data["hits"] = hits
 
       yield data
-
 
   @classmethod
   def scrape_all(cls):

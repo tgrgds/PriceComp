@@ -1,9 +1,9 @@
 import requests
 from math import ceil
 
-from . import scraper
+from . import scrapers
 
-class DerringersScraper(scraper.Scraper):
+class DerringersScraper(scrapers.Scraper):
   id = "derringers"
   _base_url = "https://aucs31.ksearchnet.com/cs/v2/search"
 
