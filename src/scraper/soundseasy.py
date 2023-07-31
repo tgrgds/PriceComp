@@ -1,6 +1,6 @@
-import requests
-from time import sleep
+from asyncio import sleep
 from math import ceil
+from httpx import AsyncClient
 from bs4 import BeautifulSoup
 
 from . import scrapers
@@ -18,7 +18,7 @@ class SoundsEasyScraper(scrapers.Scraper):
     cls._last_wait += 5
 
   @classmethod
-  def search_query(cls, query: str):
+  async def search_query(cls, query: str, client: AsyncClient):
     page = 1
 
     total_hits = 0
@@ -38,7 +38,7 @@ class SoundsEasyScraper(scrapers.Scraper):
 
       print(f"Getting page {page}/{ceil(total_hits / 250)}...")
 
-      req = requests.get(
+      req = await client.get(
         cls._base_url,
         params=params,
         headers={
@@ -46,8 +46,8 @@ class SoundsEasyScraper(scrapers.Scraper):
         }
       )
 
-      if not req.ok:
-        print(f"Request halted with status {req.status_code}")
+      if req.status_code != 200:
+        print(f"Page request halted with status {req.status_code}")
         if req.status_code == 430:
           cls.wait()
           continue
@@ -59,11 +59,11 @@ class SoundsEasyScraper(scrapers.Scraper):
       # we're just looking at each search result, visiting the page and getting some details
       # this occasionally causes a 430 (shopify's version of 429) so it takes a while to go through everything
       for card in soup.find_all("a", { "class": "boost-pfs-filter-product-item-title" }):
-        p = requests.get("https://soundseasy.com.au" + card["href"])
+        p = await client.get("https://www.soundseasy.com.au" + card["href"])
         ps = BeautifulSoup(p.text, "html.parser")
 
-        if not p.ok:
-          print(f"Request halted with status {p.status_code}")
+        if p.status_code != 200:
+          print(f"Product request halted with status {p.status_code}")
           if p.status_code == 430:
             cls.wait()
 
@@ -89,6 +89,6 @@ class SoundsEasyScraper(scrapers.Scraper):
 
 
   @classmethod
-  def scrape_all(cls):
-    for data in cls.search_query("*"):
+  async def scrape_all(cls, client: AsyncClient):
+    async for data in cls.search_query("*", client):
       yield data

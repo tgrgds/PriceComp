@@ -1,4 +1,4 @@
-import requests
+from httpx import AsyncClient
 from math import ceil
 from urllib.parse import urlencode
 
@@ -9,7 +9,7 @@ class SkyScraper(scrapers.Scraper):
   _base_url = "https://skymusic.com.au"
 
   @classmethod
-  def search_query(cls, query: str):
+  async def search_query(cls, query: str, client: AsyncClient):
     data = {
       "hits": 0,
       "products": []
@@ -36,12 +36,12 @@ class SkyScraper(scrapers.Scraper):
 
       print(f"Getting page {page}/{ceil(total_hits / 24)}...")
 
-      req = requests.get(
+      req = await client.get(
         "https://services.mybcapps.com/bc-sf-filter/search",
         params=params
       )
 
-      if not req.ok:
+      if req.status_code != 200:
         print(f"Request failed with status {req.status_code}")
         continue
 
@@ -75,6 +75,6 @@ class SkyScraper(scrapers.Scraper):
       yield data
   
   @classmethod
-  def scrape_all(cls):
-    for data in cls.search_query("*"):
+  async def scrape_all(cls, client: AsyncClient):
+    async for data in cls.search_query("*", client):
       yield data

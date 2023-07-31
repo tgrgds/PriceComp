@@ -1,4 +1,4 @@
-import requests
+from httpx import AsyncClient
 from math import ceil
 
 from . import scrapers
@@ -8,7 +8,7 @@ class HaworthScraper(scrapers.Scraper):
   _base_url = "https://svc-5-usf.hotyon.com/instantsearch"
 
   @classmethod
-  def search_query(cls, query: str):
+  async def search_query(cls, query: str, client: AsyncClient):
     page = 0
 
     total_hits = 0
@@ -20,7 +20,7 @@ class HaworthScraper(scrapers.Scraper):
       }
 
       params = {
-        "q": "",
+        "q": query,
         "apiKey": "3877fc75-49a9-44e4-9394-12e6916904a7",
         "sort": "bestselling",
         "take": 250,
@@ -31,12 +31,12 @@ class HaworthScraper(scrapers.Scraper):
 
       print(f"Getting page {page}/{ceil(total_hits / 250)}...")
 
-      req = requests.post(
+      req = await client.post(
         cls._base_url,
         params=params
       )
 
-      if not req.ok:
+      if not req.status_code == 200:
         print(f"Request halted with status {req.status_code}")
 
       results = req.json()["data"]
@@ -65,6 +65,6 @@ class HaworthScraper(scrapers.Scraper):
       yield data
 
   @classmethod
-  def scrape_all(cls):
-    for data in cls.search_query("*"):
+  async def scrape_all(cls, client: AsyncClient):
+    async for data in cls.search_query("", client):
       yield data

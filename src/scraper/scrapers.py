@@ -1,7 +1,7 @@
 import csv
 from json import dump, dumps
 from urllib.parse import urlencode
-import requests
+from httpx import AsyncClient
 
 from src.type import ScraperData
 from src.util.brands import MUSIPOS_BRANDS
@@ -10,7 +10,7 @@ class Scraper:
   id = "base"
 
   @classmethod
-  def scrape_all(cls) -> ScraperData:
+  async def scrape_all(cls, client: AsyncClient) -> ScraperData:
     raise NotImplementedError
 
   @classmethod
@@ -59,7 +59,7 @@ class AlgoliaScraper(Scraper):
     raise NotImplementedError
 
   @classmethod
-  def search_query(cls, query: str, page_limit: int = 1000) -> ScraperData:
+  async def search_query(cls, query: str, client: AsyncClient, page_limit: int = 1000) -> ScraperData:
     data = {
       "hits": 0,
       "products": []
@@ -85,13 +85,13 @@ class AlgoliaScraper(Scraper):
         ]
       }
 
-      req = requests.post(
+      req = await client.post(
         cls.base_url + "/1/indexes/*/queries",
-        data=dumps(params),
+        json=params,
         headers=cls.req_headers
       )
 
-      if not req.ok:
+      if not req.status_code == 200:
         print(f"Request halted with status {req.status_code}")
         break
 
@@ -118,14 +118,14 @@ class AlgoliaScraper(Scraper):
   # despite getting all 17k "hits" using "*" as a query we can only retrieve data from the first 1000
   # so this splits the queries up into several searches using every brand in musipos
   @classmethod
-  def scrape_all(cls):
+  async def scrape_all(cls, client: AsyncClient):
     # collect list of skus already added to reduce overlap
     skus = []
 
     for brand in MUSIPOS_BRANDS:
       print(f"Requesting brand {brand}...")
 
-      data = cls.search_query(brand)
+      data = await cls.search_query(brand, client)
 
       products = []
 

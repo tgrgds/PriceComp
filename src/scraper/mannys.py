@@ -1,4 +1,4 @@
-import requests
+from httpx import AsyncClient
 from json import dumps
 
 from . import scrapers
@@ -8,7 +8,7 @@ class MannysScraper(scrapers.Scraper):
   _base_url = "https://search.soundbay.com.au/multi_search"
 
   @classmethod
-  def search_query(cls, query: str):
+  async def search_query(cls, query: str, client: AsyncClient):
     page = 1
 
     while True:
@@ -40,7 +40,7 @@ class MannysScraper(scrapers.Scraper):
 
       print(f"Scraping page {page}...")
 
-      req = requests.post(
+      req = await client.post(
         cls._base_url,
         params={
           "x-typesense-api-key": "hwF2Qt89KwjgwvwjcNcB0ALMuKa2vvNJ"
@@ -48,7 +48,7 @@ class MannysScraper(scrapers.Scraper):
         data=dumps(params)
       )
 
-      if not req.ok:
+      if req.status_code != 200:
         print(f"Request halted with status {req.status_code}")
         break
 
@@ -77,6 +77,6 @@ class MannysScraper(scrapers.Scraper):
       page += 1
   
   @classmethod
-  def scrape_all(cls):
-    for data in cls.search_query("*"):
+  async def scrape_all(cls, client: AsyncClient):
+    async for data in cls.search_query("*", client):
       yield data

@@ -1,4 +1,4 @@
-import requests
+from httpx import AsyncClient
 from math import ceil
 
 from . import scrapers
@@ -8,7 +8,7 @@ class DerringersScraper(scrapers.Scraper):
   _base_url = "https://aucs31.ksearchnet.com/cs/v2/search"
 
   @classmethod
-  def search_query(cls, query: str):
+  async def search_query(cls, query: str, client: AsyncClient):
     page = 1
 
     total_hits = 0
@@ -31,7 +31,7 @@ class DerringersScraper(scrapers.Scraper):
             "typeOfRequest":"SEARCH",
             "settings":{
               "query":{
-                "term":"*"
+                "term": query
               },
               "typeOfRecords":[
                 "KLEVU_PRODUCT"
@@ -49,12 +49,12 @@ class DerringersScraper(scrapers.Scraper):
 
       print(f"Getting page {page}/{ceil(total_hits / 100)}...")
 
-      req = requests.post(
+      req = await client.post(
         cls._base_url,
         json=params
       )
 
-      if not req.ok:
+      if req.status_code != 200:
         print(f"Request halted with status {req.status_code}")
 
       results = req.json()["queryResults"][0]
@@ -84,6 +84,6 @@ class DerringersScraper(scrapers.Scraper):
       yield data
 
   @classmethod
-  def scrape_all(cls):
-    for data in cls.search_query("*"):
+  async def scrape_all(cls, client: AsyncClient):
+    async for data in cls.search_query("*", client):
       yield data
