@@ -74,7 +74,7 @@ class AlgoliaScraper(Scraper):
       params = {
         "requests": [
           {
-            "indexName": cls.index_name,
+            "indexName": cls.index_name or None,
             "params": urlencode({
               "query": query,
               "page": str(page),
