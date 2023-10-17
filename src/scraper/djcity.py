@@ -1,4 +1,5 @@
 from urllib.parse import urlencode
+import logging
 
 from . import scrapers
 

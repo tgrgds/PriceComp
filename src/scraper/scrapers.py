@@ -1,4 +1,4 @@
-import csv
+import csv, logging, logging.handlers
 from json import dump, dumps
 from urllib.parse import urlencode
 from httpx import AsyncClient
@@ -8,6 +8,22 @@ from src.util.brands import MUSIPOS_BRANDS
 
 class Scraper:
   id = "base"
+  logger: logging.Logger = None
+
+  @classmethod
+  def log(cls) -> logging.Logger:
+    if not cls.logger:
+      cls.logger = logging.getLogger(cls.id)
+
+      file_handler = logging.handlers.TimedRotatingFileHandler(f"logs/{cls.id}.log", when="midnight", backupCount=3)
+      formatter = logging.Formatter("%(asctime)s:%(name)s %(levelname)s:%(message)s")
+
+      file_handler.setFormatter(formatter)
+
+      cls.logger.addHandler(file_handler)
+      cls.logger.setLevel(logging.DEBUG)
+
+    return cls.logger
 
   @classmethod
   async def scrape_all(cls, client: AsyncClient) -> ScraperData:
@@ -92,7 +108,7 @@ class AlgoliaScraper(Scraper):
       )
 
       if not req.status_code == 200:
-        print(f"Request halted with status {req.status_code}")
+        cls.log().warn(f"Request halted with status {req.status_code}")
         break
 
       result = req.json()
@@ -123,7 +139,7 @@ class AlgoliaScraper(Scraper):
     skus = []
 
     for brand in MUSIPOS_BRANDS:
-      print(f"Requesting brand {brand}...")
+      cls.log().info(f"Requesting brand {brand}...")
 
       data = await cls.search_query(brand, client)
 
@@ -135,7 +151,7 @@ class AlgoliaScraper(Scraper):
 
       new_hits = len(products)
 
-      print(f"{data['hits']} hits - {data['hits'] - new_hits} duplicates = {new_hits} products added")
+      cls.log().info(f"{data['hits']} hits - {data['hits'] - new_hits} duplicates = {new_hits} products added")
 
       # skip if no products to add
       if new_hits == 0:

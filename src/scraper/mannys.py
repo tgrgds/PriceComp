@@ -38,7 +38,7 @@ class MannysScraper(scrapers.Scraper):
         ]
       }
 
-      print(f"Scraping page {page}...")
+      cls.log().info(f"Scraping page {page}...")
 
       req = await client.post(
         cls._base_url,
@@ -49,7 +49,7 @@ class MannysScraper(scrapers.Scraper):
       )
 
       if req.status_code != 200:
-        print(f"Request halted with status {req.status_code}")
+        cls.log().warn(f"Request halted with status {req.status_code}")
         break
 
       result = req.json()

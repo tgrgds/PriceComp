@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 import httpx
+import logging
 
 from src.prisma import prisma
 from src.auth import api_key_auth
@@ -26,7 +27,7 @@ async def chunk_scrape(scraper: Scraper):
             "in_stock": product["in_stock"]
           }
 
-          print(data)
+          logging.getLogger(scraper.id).debug(data)
 
           batcher.product.upsert(
             where={

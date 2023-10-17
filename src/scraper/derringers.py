@@ -47,7 +47,7 @@ class DerringersScraper(scrapers.Scraper):
         ]
       }
 
-      print(f"Getting page {page}/{ceil(total_hits / 100)}...")
+      cls.log().info(f"Getting page {page}/{ceil(total_hits / 100)}...")
 
       req = await client.post(
         cls._base_url,
@@ -55,7 +55,7 @@ class DerringersScraper(scrapers.Scraper):
       )
 
       if req.status_code != 200:
-        print(f"Request halted with status {req.status_code}")
+        cls.log().warn(f"Request halted with status {req.status_code}")
 
       results = req.json()["queryResults"][0]
       total_hits = results["meta"]["totalResultsFound"]

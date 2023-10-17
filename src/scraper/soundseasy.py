@@ -12,7 +12,7 @@ class SoundsEasyScraper(scrapers.Scraper):
 
   @classmethod
   def wait(cls):
-    print(f"Got error 430, sleeping for {cls._last_wait} seconds...")
+    cls.log().info(f"Got error 430, sleeping for {cls._last_wait} seconds...")
     sleep(cls._last_wait)
 
     cls._last_wait += 5
@@ -36,7 +36,7 @@ class SoundsEasyScraper(scrapers.Scraper):
         # "view": "json",
       }
 
-      print(f"Getting page {page}/{ceil(total_hits / 250)}...")
+      cls.log().info(f"Getting page {page}/{ceil(total_hits / 250)}...")
 
       req = await client.get(
         cls._base_url,
@@ -47,7 +47,7 @@ class SoundsEasyScraper(scrapers.Scraper):
       )
 
       if req.status_code != 200:
-        print(f"Page request halted with status {req.status_code}")
+        cls.log().warn(f"Page request halted with status {req.status_code}")
         if req.status_code == 430:
           cls.wait()
           continue
@@ -63,7 +63,7 @@ class SoundsEasyScraper(scrapers.Scraper):
         ps = BeautifulSoup(p.text, "html.parser")
 
         if p.status_code != 200:
-          print(f"Product request halted with status {p.status_code}")
+          cls.log().warn(f"Product request halted with status {p.status_code}")
           if p.status_code == 430:
             cls.wait()
 
@@ -78,9 +78,8 @@ class SoundsEasyScraper(scrapers.Scraper):
             "in_stock": ps.find("div", { "class": "items_left" }) != None
           })
 
-          print(sku)
         except Exception as e:
-          print(f"Skipping due to error: {e}")
+          cls.log().info(f"Skipping due to error: {e}")
           pass
 
       yield data

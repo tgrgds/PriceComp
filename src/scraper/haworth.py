@@ -29,7 +29,7 @@ class HaworthScraper(scrapers.Scraper):
         "skip": 250 * page,
       }
 
-      print(f"Getting page {page}/{ceil(total_hits / 250)}...")
+      cls.log().info(f"Getting page {page}/{ceil(total_hits / 250)}...")
 
       req = await client.post(
         cls._base_url,
@@ -37,7 +37,7 @@ class HaworthScraper(scrapers.Scraper):
       )
 
       if not req.status_code == 200:
-        print(f"Request halted with status {req.status_code}")
+        cls.log().warn(f"Request halted with status {req.status_code}")
 
       results = req.json()["data"]
       total_hits = results["total"]

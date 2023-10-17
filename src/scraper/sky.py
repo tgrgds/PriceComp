@@ -34,7 +34,7 @@ class SkyScraper(scrapers.Scraper):
         "limit": "24", # values higher than 24 just give us 20 products
       })
 
-      print(f"Getting page {page}/{ceil(total_hits / 24)}...")
+      cls.log().info(f"Getting page {page}/{ceil(total_hits / 24)}...")
 
       req = await client.get(
         "https://services.mybcapps.com/bc-sf-filter/search",
@@ -42,7 +42,7 @@ class SkyScraper(scrapers.Scraper):
       )
 
       if req.status_code != 200:
-        print(f"Request failed with status {req.status_code}")
+        cls.log().warn(f"Request failed with status {req.status_code}")
         continue
 
       results = req.json()
@@ -51,7 +51,7 @@ class SkyScraper(scrapers.Scraper):
       # get and compare product list hashes
       product_hash = hash(str(results["products"]))
       if product_hash == last_page_hash:
-        print("Got duplicate page. This should mean we're done.")
+        cls.log().info("Got duplicate page. This should mean we're done.")
         break
       else: last_page_hash = product_hash
 
@@ -67,8 +67,6 @@ class SkyScraper(scrapers.Scraper):
           "url": cls._base_url + "/collections/all/products/" + product["handle"],
           "in_stock": product["available"]
         })
-
-      print(data["hits"])
 
       page += 1
 
