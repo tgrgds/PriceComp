@@ -3,6 +3,7 @@ services:
   pricecomp:
     volumes:
       - db-data:/prisma/db/
+      - ./logs:/logs
     build:
       context: .
       dockerfile: Dockerfile
