@@ -1,9 +1,14 @@
 version: "3.9"
 services:
   pricecomp:
+    volumes:
+      - db-data:/prisma/db/
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8000:80"
     env_file: .env
+
+volumes:
+  db-data:
