@@ -1,6 +1,6 @@
-from . import scrapers
+from . import scraper
 
-class LogansScraper(scrapers.AlgoliaScraper):
+class LogansScraper(scraper.AlgoliaScraper):
   id = "logans"
   base_url = "https://2pz2m6w8lw-dsn.algolia.net"
   req_headers = {

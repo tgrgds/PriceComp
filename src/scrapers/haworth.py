@@ -1,9 +1,9 @@
 from httpx import AsyncClient
 from math import ceil
 
-from . import scrapers
+from . import scraper
 
-class HaworthScraper(scrapers.Scraper):
+class HaworthScraper(scraper.Scraper):
   id = "haworth"
   _base_url = "https://svc-5-usf.hotyon.com/instantsearch"
 

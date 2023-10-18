@@ -1,6 +1,6 @@
-from . import scrapers
+from . import scraper
 
-class TurraScraper(scrapers.AlgoliaScraper):
+class TurraScraper(scraper.AlgoliaScraper):
   id = "turra"
   base_url = "https://qzcseio8f2-dsn.algolia.net"
   req_headers = {

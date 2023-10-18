@@ -4,7 +4,7 @@ import logging
 
 from src.prisma import prisma
 from src.auth import api_key_auth
-from src.scraper import Scraper, SCRAPERS
+from src.scrapers import Scraper, SCRAPERS
 from src.type import SiteName
 
 router = APIRouter()

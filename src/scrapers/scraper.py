@@ -8,22 +8,22 @@ from src.util.brands import MUSIPOS_BRANDS
 
 class Scraper:
   id = "base"
-  logger: logging.Logger = None
+  _logger: logging.Logger = None
 
   @classmethod
   def log(cls) -> logging.Logger:
-    if not cls.logger:
-      cls.logger = logging.getLogger(cls.id)
+    if not cls._logger:
+      cls._logger = logging.getLogger(cls.id)
 
       file_handler = logging.handlers.TimedRotatingFileHandler(f"logs/{cls.id}.log", when="midnight", backupCount=3)
       formatter = logging.Formatter("%(asctime)s:%(name)s %(levelname)s:%(message)s")
 
       file_handler.setFormatter(formatter)
 
-      cls.logger.addHandler(file_handler)
-      cls.logger.setLevel(logging.DEBUG)
+      cls._logger.addHandler(file_handler)
+      cls._logger.setLevel(logging.DEBUG)
 
-    return cls.logger
+    return cls._logger
 
   @classmethod
   async def scrape_all(cls, client: AsyncClient) -> ScraperData:

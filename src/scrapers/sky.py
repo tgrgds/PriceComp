@@ -2,9 +2,9 @@ from httpx import AsyncClient
 from math import ceil
 from urllib.parse import urlencode
 
-from . import scrapers
+from . import scraper
 
-class SkyScraper(scrapers.Scraper):
+class SkyScraper(scraper.Scraper):
   id = "sky"
   _base_url = "https://skymusic.com.au"
 

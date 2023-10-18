@@ -1,9 +1,9 @@
 from httpx import AsyncClient
 from json import dumps
 
-from . import scrapers
+from . import scraper
 
-class MannysScraper(scrapers.Scraper):
+class MannysScraper(scraper.Scraper):
   id = "mannys"
   _base_url = "https://search.soundbay.com.au/multi_search"
 

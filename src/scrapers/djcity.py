@@ -1,9 +1,9 @@
 from urllib.parse import urlencode
 import logging
 
-from . import scrapers
+from . import scraper
 
-class DjcityScraper(scrapers.AlgoliaScraper):
+class DjcityScraper(scraper.AlgoliaScraper):
   id = "djcity"
   base_url = "https://i2uwp1cwqx-dsn.algolia.net"
   req_headers = {

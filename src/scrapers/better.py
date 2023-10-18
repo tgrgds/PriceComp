@@ -1,8 +1,8 @@
 from urllib.parse import urlencode
 
-from . import scrapers
+from . import scraper
 
-class BetterScraper(scrapers.AlgoliaScraper):
+class BetterScraper(scraper.AlgoliaScraper):
   id = "better"
   base_url = "https://g6qbk0086l-dsn.algolia.net"
   req_headers = {

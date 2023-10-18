@@ -3,9 +3,9 @@ from math import ceil
 from httpx import AsyncClient
 from bs4 import BeautifulSoup
 
-from . import scrapers
+from . import scraper
 
-class SoundsEasyScraper(scrapers.Scraper):
+class SoundsEasyScraper(scraper.Scraper):
   id = "soundseasy"
   _base_url = "https://www.soundseasy.com.au/search"
   _last_wait = 5

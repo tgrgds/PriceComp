@@ -1,9 +1,9 @@
 from httpx import AsyncClient
 from math import ceil
 
-from . import scrapers
+from . import scraper
 
-class DerringersScraper(scrapers.Scraper):
+class DerringersScraper(scraper.Scraper):
   id = "derringers"
   _base_url = "https://aucs31.ksearchnet.com/cs/v2/search"
 
