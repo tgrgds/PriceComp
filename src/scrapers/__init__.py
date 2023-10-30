@@ -12,6 +12,6 @@ SCRAPERS: dict[SiteName, Scraper] = {
   "derringers": derringers.DerringersScraper,
   "mooloolaba": mooloolaba.MooloolabaScraper,
   "logans": logans.LogansScraper,
-  "sky": sky.SkyScraper,
+  # "sky": sky.SkyScraper,
   "djcity": djcity.DjcityScraper
 }
