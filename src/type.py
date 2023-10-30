@@ -25,3 +25,4 @@ class SiteName(str, Enum):
   logans = "logans"
   # sky = "sky"
   djcity = "djcity"
+  mega = "mega"

@@ -1,7 +1,7 @@
 from src.type import SiteName
 
 from .scraper import Scraper
-from . import better, haworth, mannys, soundseasy, turra, derringers, mooloolaba, logans, sky, djcity
+from . import better, haworth, mannys, soundseasy, turra, derringers, mooloolaba, logans, sky, djcity, mega
 
 SCRAPERS: dict[SiteName, Scraper] = {
   "better": better.BetterScraper,
@@ -13,5 +13,6 @@ SCRAPERS: dict[SiteName, Scraper] = {
   "mooloolaba": mooloolaba.MooloolabaScraper,
   "logans": logans.LogansScraper,
   # "sky": sky.SkyScraper,
-  "djcity": djcity.DjcityScraper
+  "djcity": djcity.DjcityScraper,
+  "mega": mega.MegaScraper
 }
