@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from prisma.errors import FieldNotFoundError
 import httpx
 import logging
 import re
@@ -15,32 +16,46 @@ router = APIRouter()
 scraper_queue = []
 
 async def chunk_scrape(scraper: Scraper):
+  logger = logging.getLogger(scraper.id)
+  batch_count = 0
+  error_count = 0
+
   async with httpx.AsyncClient() as client:
     async for chunk in scraper.scrape_all(client):
-      async with prisma.batch_() as batcher:
-        for product in chunk["products"]:
-          data = {
-            "id": f"{scraper.id}_{product['sku'].replace(' ', '-').lower()}",
-            "store_id": scraper.id,
-            "sku": product["sku"],
-            "sku_trunc": re.sub(r'[^a-zA-Z0-9]', '', product["sku"]),
-            "url": product["url"],
-            "price": product["price"],
-            "in_stock": product["in_stock"]
-          }
+      batch_count += 1
 
-          logging.getLogger(scraper.id).debug(data)
-
-          batcher.product.upsert(
-            where={
-              "id": f"{scraper.id}_{product['sku'].replace(' ', '-').lower()}"
-            },
-            data={
-              "create": data,
-              "update": data
+      try:
+        async with prisma.batch_() as batcher:
+          for product in chunk["products"]:
+            data = {
+              "id": f"{scraper.id}_{product['sku'].replace(' ', '-').lower()}",
+              "store_id": scraper.id,
+              "sku": product["sku"],
+              "sku_trunc": re.sub(r'[^a-zA-Z0-9]', '', product["sku"]),
+              "url": product["url"],
+              "price": float(product["price"]),
+              "in_stock": product["in_stock"]
             }
-          )
-    
+
+            logger.debug(data)
+
+            batcher.product.upsert(
+              where={
+                "id": f"{scraper.id}_{product['sku'].replace(' ', '-').lower()}"
+              },
+              data={
+                "create": data,
+                "update": data
+              }
+            )
+      except Exception as e:
+        logger.error("Batch failed!")
+        logger.error(e)
+        error_count += 1
+
+    if error_count > 0:
+      logger.warn(f"{error_count} out of {batch_count} batches failed!")
+
     try:
       scraper_queue.remove(scraper.id)
     except:
