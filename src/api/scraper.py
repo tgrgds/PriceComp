@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 import httpx
 import logging
+import re
 
 from src.prisma import prisma
 from src.auth import api_key_auth
@@ -22,6 +23,7 @@ async def chunk_scrape(scraper: Scraper):
             "id": f"{scraper.id}_{product['sku'].replace(' ', '-').lower()}",
             "store_id": scraper.id,
             "sku": product["sku"],
+            "sku_trunc": re.sub(r'[^a-zA-Z0-9]', '', product["sku"]),
             "url": product["url"],
             "price": product["price"],
             "in_stock": product["in_stock"]

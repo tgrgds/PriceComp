@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import Union
 from pydantic import BaseModel
 from prisma.errors import UniqueViolationError
+import re
 
 from src.prisma import prisma
 from src.auth import api_key_auth
@@ -36,8 +37,8 @@ async def search_products(search: str, strict: bool = False, store: Union[SiteNa
   }
 
   if strict:
-    query = { 
-      "sku": search,
+    query = {
+      "sku_trunc": re.sub(r'[^a-zA-Z0-9]', '', search),
     }
 
   products = await prisma.product.find_many(where=query)

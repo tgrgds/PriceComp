@@ -10,14 +10,15 @@ generator client {
 }
 
 model Product {
-  id       String   @id @unique // combination of store_sku
-  sku      String
-  store_id String
-  url      String
-  price    Float
-  in_stock Boolean
-  created  DateTime @default(now())
-  updated  DateTime @updatedAt
+  id        String   @id @unique // combination of store_sku
+  sku       String
+  sku_trunc String   @default("") // the sku without any symbols or spaces to better help searches
+  store_id  String
+  url       String
+  price     Float
+  in_stock  Boolean
+  created   DateTime @default(now())
+  updated   DateTime @updatedAt
 }
 
 model User {
