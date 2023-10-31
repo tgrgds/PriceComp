@@ -28,7 +28,7 @@ ENV PATH="/.venv/bin:$PATH"
 # Install application into container
 COPY . .
 
-RUN prisma generate && prisma migrate deploy
+RUN prisma generate
 
 # Run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--proxy-headers"]
+CMD ["./migrate_and_start.sh"]
