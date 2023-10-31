@@ -4,6 +4,7 @@ from pydantic import BaseSettings
 
 class Settings(BaseSettings):
   admin_key: str
+  debug: bool = False
 
   class Config:
     env_file = ".env"

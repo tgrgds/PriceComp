@@ -21,37 +21,49 @@ async def chunk_scrape(scraper: Scraper):
   error_count = 0
 
   async with httpx.AsyncClient() as client:
-    async for chunk in scraper.scrape_all(client):
-      batch_count += 1
+    try:
+      async for chunk in scraper.scrape_all(client):
+        batch_count += 1
 
-      try:
-        async with prisma.batch_() as batcher:
-          for product in chunk["products"]:
-            data = {
-              "id": f"{scraper.id}_{product['sku'].replace(' ', '-').lower()}",
-              "store_id": scraper.id,
-              "sku": product["sku"],
-              "sku_trunc": re.sub(r'[^a-zA-Z0-9]', '', product["sku"]),
-              "url": product["url"],
-              "price": float(product["price"]),
-              "in_stock": product["in_stock"]
-            }
+        # TODO: consider adding a timeout (5-10 minutes or something)
+        # So far all scrapers that end up idling have been because of uncaught and silent exceptions
+        # (which now get caught and logged below)
+        # so might not be a need for now.
 
-            logger.debug(data)
-
-            batcher.product.upsert(
-              where={
-                "id": f"{scraper.id}_{product['sku'].replace(' ', '-').lower()}"
-              },
-              data={
-                "create": data,
-                "update": data
+        try:
+          async with prisma.batch_() as batcher:
+            for product in chunk["products"]:
+              data = {
+                "id": f"{scraper.id}_{product['sku'].replace(' ', '-').lower()}",
+                "store_id": scraper.id,
+                "sku": product["sku"],
+                "sku_trunc": re.sub(r'[^a-zA-Z0-9]', '', product["sku"]),
+                "url": product["url"],
+                "price": float(product["price"]),
+                "in_stock": product["in_stock"]
               }
-            )
-      except Exception as e:
-        logger.error("Batch failed!")
-        logger.error(e)
-        error_count += 1
+
+              logger.debug(data)
+
+              batcher.product.upsert(
+                where={
+                  "id": f"{scraper.id}_{product['sku'].replace(' ', '-').lower()}"
+                },
+                data={
+                  "create": data,
+                  "update": data
+                }
+              )
+        # Exception when submitting batch to prisma
+        except Exception as e:
+          logger.error("Batch failed!")
+          logger.exception(e)
+          error_count += 1
+    
+    # Exception when scraping batch
+    except Exception as e:
+      logger.error("Scraper failed due to uncaught exception!")
+      logger.exception(e)
 
     if error_count > 0:
       logger.warn(f"{error_count} out of {batch_count} batches failed!")
@@ -87,3 +99,22 @@ async def list_sites():
   sites = [site.value for site in SiteName]
 
   return sites
+
+# Get the status of all scrapers
+# Including product count and any other useful info
+@router.get("/scraper/status", dependencies=[Depends(api_key_auth)])
+async def scraper_status():
+  data = []
+
+  for site in SiteName:
+    product_count = await prisma.product.count(where={
+      "store_id": site.value
+    })
+
+    data.append({
+      "store_id": site.value,
+      "product_count": product_count,
+      "running": site.value in scraper_queue
+    })
+  
+  return data

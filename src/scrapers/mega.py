@@ -47,12 +47,14 @@ class MegaScraper(scraper.Scraper):
       for card in soup.find_all("div", { "class": "type-product" }):
         product = card.find("span", { "class": "gtm4wp_productdata" })
 
+        stock = product.get("data-gtm4wp_product_stocklevel")
+
         data["products"].append({
           "sku": card.find("a", { "class": "button" }).get("data-product_sku"),
           "name": product.get("data-gtm4wp_product_name"),
           "price": product.get("data-gtm4wp_product_price"),
           "url": product.get("data-gtm4wp_product_url"),
-          "in_stock": int(product.get("data-gtm4wp_product_stocklevel")) > 0
+          "in_stock": int(stock) > 0 if stock else False
         })
 
       yield data
