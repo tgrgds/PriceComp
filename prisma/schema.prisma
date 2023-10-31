@@ -21,6 +21,13 @@ model Product {
   updated   DateTime @updatedAt
 }
 
+model Competitor {
+  store_id             String    @id @unique
+  last_scrape          DateTime?
+  last_scrape_duration Float?
+  last_scrape_failed   Boolean?  @default(false)
+}
+
 model User {
   hash       String   @id @unique
   created_at DateTime @default(now())

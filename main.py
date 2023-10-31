@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from src.api import api
 from src.prisma import prisma
 from src.config import get_settings
+from src.type import SiteName
 
 if get_settings().debug:
   print("DEBUG enabled. Loading logger")
@@ -31,6 +32,18 @@ app.include_router(api, prefix="/api")
 @app.on_event("startup")
 async def startup():
   await prisma.connect()
+
+  # Init competitor "analytics"
+  for site in SiteName:
+    await prisma.competitor.upsert(
+      where={
+        "store_id": site.value
+      },
+      data={
+        "create": { "store_id": site.value },
+        "update": { "store_id": site.value },
+      }
+    )
 
 @app.on_event("shutdown")
 async def shutdown():

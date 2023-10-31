@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from prisma.errors import FieldNotFoundError
+from datetime import datetime
+from time import time
 import httpx
 import logging
 import re
@@ -19,6 +21,9 @@ async def chunk_scrape(scraper: Scraper):
   logger = logging.getLogger(scraper.id)
   batch_count = 0
   error_count = 0
+  failed = False
+
+  _starttime = time()
 
   async with httpx.AsyncClient() as client:
     try:
@@ -64,6 +69,7 @@ async def chunk_scrape(scraper: Scraper):
     except Exception as e:
       logger.error("Scraper failed due to uncaught exception!")
       logger.exception(e)
+      failed = True
 
     if error_count > 0:
       logger.warn(f"{error_count} out of {batch_count} batches failed!")
@@ -72,6 +78,16 @@ async def chunk_scrape(scraper: Scraper):
       scraper_queue.remove(scraper.id)
     except:
       pass
+
+  # Update competitor status data
+  await prisma.competitor.update(
+    where={ "store_id": scraper.id },
+    data={
+      "last_scrape": datetime.now(),
+      "last_scrape_duration": time() - _starttime,
+      "last_scrape_failed": failed
+    }
+  )
 
 @router.post("/scraper/{site_name}", status_code=201, dependencies=[Depends(api_key_auth)],
              tags=["scraper"], description="Get all data from a competitor site and update the database.")
@@ -111,10 +127,18 @@ async def scraper_status():
       "store_id": site.value
     })
 
+    comp = await prisma.competitor.find_first(where={ "store_id": site.value })
+
+    # TODO: last scrape duration, last scrape datetime
     data.append({
       "store_id": site.value,
       "product_count": product_count,
-      "running": site.value in scraper_queue
+      "running": site.value in scraper_queue,
+      "last_scrape": {
+        "date": comp.last_scrape,
+        "duration": comp.last_scrape_duration,
+        "failed": comp.last_scrape_failed
+      } if comp.last_scrape else None,
     })
   
   return data
