@@ -1,4 +1,4 @@
-from math import ceil
+from math import floor
 import logging
 
 from . import scraper
@@ -32,7 +32,7 @@ class AngkorScraper(scraper.Scraper):
         "q": query
       }
 
-      logging.info(f"Getting page {page}/{ceil(total_hits / 100)}...")
+      logging.info(f"Getting page {page}/{floor(total_hits / 100)}...")
 
       req = requests.post(
         cls._base_url,

@@ -1,6 +1,8 @@
 from httpx import AsyncClient
 from json import dumps
+from math import floor
 
+from src.type import ScraperData
 from . import scraper
 
 class MannysScraper(scraper.Scraper):
@@ -10,6 +12,8 @@ class MannysScraper(scraper.Scraper):
   @classmethod
   async def search_query(cls, query: str, client: AsyncClient):
     page = 1
+
+    total_hits = 1
 
     while True:
       data = {
@@ -38,7 +42,7 @@ class MannysScraper(scraper.Scraper):
         ]
       }
 
-      cls.log().info(f"Scraping page {page}...")
+      cls.log().info(f"Scraping page {page}/{floor(total_hits/250)}...")
 
       req = await client.post(
         cls._base_url,
@@ -54,6 +58,8 @@ class MannysScraper(scraper.Scraper):
 
       result = req.json()
       result = result["results"][0]
+
+      total_hits = result["found"]
 
       if len(result["hits"]) > 0:
         for res in result["hits"]:
@@ -72,11 +78,11 @@ class MannysScraper(scraper.Scraper):
 
       data["hits"] = len(result["hits"])
 
-      yield data
+      yield ScraperData(products=data["products"], progress=page/floor(total_hits/250))
       
       page += 1
   
   @classmethod
-  async def scrape_all(cls, client: AsyncClient):
+  async def scrape_all(cls, client: AsyncClient) -> ScraperData:
     async for data in cls.search_query("*", client):
       yield data

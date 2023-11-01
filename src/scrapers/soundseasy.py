@@ -1,8 +1,9 @@
 from asyncio import sleep
-from math import ceil
+from math import floor
 from httpx import AsyncClient
 from bs4 import BeautifulSoup
 
+from src.type import ScraperData
 from . import scraper
 
 class SoundsEasyScraper(scraper.Scraper):
@@ -36,7 +37,7 @@ class SoundsEasyScraper(scraper.Scraper):
         # "view": "json",
       }
 
-      cls.log().info(f"Getting page {page}/{ceil(total_hits / 250)}...")
+      cls.log().info(f"Getting page {page}/{floor(total_hits / 250)}...")
 
       req = await client.get(
         cls._base_url,
@@ -82,12 +83,12 @@ class SoundsEasyScraper(scraper.Scraper):
           cls.log().info(f"Skipping due to error: {e}")
           pass
 
-      yield data
+      yield ScraperData(products=data["products"], progress=page/floor(total_hits / 250))
 
       page += 1
 
 
   @classmethod
-  async def scrape_all(cls, client: AsyncClient):
+  async def scrape_all(cls, client: AsyncClient) -> ScraperData:
     async for data in cls.search_query("*", client):
       yield data

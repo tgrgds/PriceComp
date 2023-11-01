@@ -1,7 +1,8 @@
 from httpx import AsyncClient
-from math import ceil
+from math import floor
 from urllib.parse import urlencode
 
+from src.type import ScraperData
 from . import scraper
 
 class SkyScraper(scraper.Scraper):
@@ -34,7 +35,7 @@ class SkyScraper(scraper.Scraper):
         "limit": "24", # values higher than 24 just give us 20 products
       })
 
-      cls.log().info(f"Getting page {page}/{ceil(total_hits / 24)}...")
+      cls.log().info(f"Getting page {page}/{floor(total_hits / 24)}...")
 
       req = await client.get(
         "https://services.mybcapps.com/bc-sf-filter/search",
@@ -70,9 +71,9 @@ class SkyScraper(scraper.Scraper):
 
       page += 1
 
-      yield data
+      yield ScraperData(products=data["products"], progress=page/floor(total_hits / 24))
   
   @classmethod
-  async def scrape_all(cls, client: AsyncClient):
+  async def scrape_all(cls, client: AsyncClient) -> ScraperData:
     async for data in cls.search_query("*", client):
       yield data

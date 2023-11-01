@@ -9,7 +9,7 @@ import re
 from src.prisma import prisma
 from src.auth import api_key_auth
 from src.scrapers import Scraper, SCRAPERS
-from src.type import SiteName
+from src.type import SiteName, ScraperData
 
 router = APIRouter()
 
@@ -22,13 +22,17 @@ async def chunk_scrape(scraper: Scraper):
   batch_count = 0
   error_count = 0
   failed = False
+  progress = 0
 
   _starttime = time()
 
   async with httpx.AsyncClient() as client:
     try:
+      chunk: ScraperData
       async for chunk in scraper.scrape_all(client):
         batch_count += 1
+
+        progress = chunk.progress
 
         # TODO: consider adding a timeout (5-10 minutes or something)
         # So far all scrapers that end up idling have been because of uncaught and silent exceptions
@@ -37,22 +41,22 @@ async def chunk_scrape(scraper: Scraper):
 
         try:
           async with prisma.batch_() as batcher:
-            for product in chunk["products"]:
+            for product in chunk.products:
               data = {
-                "id": f"{scraper.id}_{product['sku'].replace(' ', '-').lower()}",
+                "id": f"{scraper.id}_{product.sku.replace(' ', '-').lower()}",
                 "store_id": scraper.id,
-                "sku": product["sku"],
-                "sku_trunc": re.sub(r'[^a-zA-Z0-9]', '', product["sku"]),
-                "url": product["url"],
-                "price": float(product["price"]),
-                "in_stock": product["in_stock"]
+                "sku": product.sku,
+                "sku_trunc": re.sub(r'[^a-zA-Z0-9]', '', product.sku),
+                "url": product.url,
+                "price": float(product.price),
+                "in_stock": product.in_stock
               }
 
               logger.debug(data)
 
               batcher.product.upsert(
                 where={
-                  "id": f"{scraper.id}_{product['sku'].replace(' ', '-').lower()}"
+                  "id": f"{scraper.id}_{product.sku.replace(' ', '-').lower()}"
                 },
                 data={
                   "create": data,
@@ -61,7 +65,7 @@ async def chunk_scrape(scraper: Scraper):
               )
         # Exception when submitting batch to prisma
         except Exception as e:
-          logger.error("Batch failed!")
+          logger.error(f"Batch failed!")
           logger.exception(e)
           error_count += 1
     
@@ -85,7 +89,8 @@ async def chunk_scrape(scraper: Scraper):
     data={
       "last_scrape": datetime.now(),
       "last_scrape_duration": time() - _starttime,
-      "last_scrape_failed": failed
+      "last_scrape_failed": failed,
+      "last_scrape_progress": float(progress)
     }
   )
 
@@ -137,7 +142,8 @@ async def scraper_status():
       "last_scrape": {
         "date": comp.last_scrape,
         "duration": comp.last_scrape_duration,
-        "failed": comp.last_scrape_failed
+        "failed": comp.last_scrape_failed,
+        "progress": comp.last_scrape_progress
       } if comp.last_scrape else None,
     })
   

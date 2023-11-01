@@ -134,11 +134,11 @@ class AlgoliaScraper(Scraper):
   # despite getting all 17k "hits" using "*" as a query we can only retrieve data from the first 1000
   # so this splits the queries up into several searches using every brand in musipos
   @classmethod
-  async def scrape_all(cls, client: AsyncClient):
+  async def scrape_all(cls, client: AsyncClient) -> ScraperData:
     # collect list of skus already added to reduce overlap
     skus = []
 
-    for brand in MUSIPOS_BRANDS:
+    for i, brand in enumerate(MUSIPOS_BRANDS):
       cls.log().info(f"Requesting brand {brand}...")
 
       data = await cls.search_query(brand, client)
@@ -161,7 +161,4 @@ class AlgoliaScraper(Scraper):
       # so we don't get duplicates
       skus += [p["sku"] for p in products if p["sku"] not in skus]
 
-      yield {
-        "hits": new_hits,
-        "products": products
-      }
+      yield ScraperData(progress=i/(len(MUSIPOS_BRANDS) - 1), products=products)

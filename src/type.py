@@ -11,7 +11,7 @@ class Product(BaseModel):
   in_stock: bool
 
 class ScraperData(BaseModel):
-  hits: int
+  progress: float
   products: list[Product]
 
 class SiteName(str, Enum):

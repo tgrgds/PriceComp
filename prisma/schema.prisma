@@ -26,6 +26,7 @@ model Competitor {
   last_scrape          DateTime?
   last_scrape_duration Float?
   last_scrape_failed   Boolean?  @default(false)
+  last_scrape_progress Float?
 }
 
 model User {

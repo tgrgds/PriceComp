@@ -1,7 +1,8 @@
-from math import ceil
+from math import floor
 from httpx import AsyncClient
 from bs4 import BeautifulSoup
 
+from src.type import ScraperData
 from . import scraper
 
 class MegaScraper(scraper.Scraper):
@@ -25,7 +26,7 @@ class MegaScraper(scraper.Scraper):
         "post_type": "product"
       }
 
-      cls.log().info(f"Getting page {page}/{ceil(total_hits / 32)}...")
+      cls.log().info(f"Getting page {page}/{floor(total_hits / 32)}...")
 
       req = await client.get(cls._base_url + f"/page/{page}", params=params, headers={
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0"
@@ -57,11 +58,11 @@ class MegaScraper(scraper.Scraper):
           "in_stock": int(stock) > 0 if stock else False
         })
 
-      yield data
-
       page += 1
 
+      yield ScraperData(products=data["products"], progress=page/floor(total_hits / 32))
+
   @classmethod
-  async def scrape_all(cls, client: AsyncClient):
+  async def scrape_all(cls, client: AsyncClient) -> ScraperData:
     async for data in cls.search_query("*", client):
       yield data

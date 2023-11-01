@@ -1,6 +1,7 @@
 from httpx import AsyncClient
-from math import ceil
+from math import floor
 
+from src.type import ScraperData
 from . import scraper
 
 class HaworthScraper(scraper.Scraper):
@@ -29,7 +30,7 @@ class HaworthScraper(scraper.Scraper):
         "skip": 250 * page,
       }
 
-      cls.log().info(f"Getting page {page}/{ceil(total_hits / 250)}...")
+      cls.log().info(f"Getting page {page}/{floor(total_hits / 250)}...")
 
       req = await client.post(
         cls._base_url,
@@ -57,14 +58,14 @@ class HaworthScraper(scraper.Scraper):
 
       else:
         break
-
-      page += 1
       
       data["hits"] = hits
 
-      yield data
+      yield ScraperData(products=data["products"], progress=page/floor(total_hits / 250))
+
+      page += 1
 
   @classmethod
-  async def scrape_all(cls, client: AsyncClient):
+  async def scrape_all(cls, client: AsyncClient) -> ScraperData:
     async for data in cls.search_query("", client):
       yield data
