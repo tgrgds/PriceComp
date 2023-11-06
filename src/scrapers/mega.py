@@ -58,9 +58,9 @@ class MegaScraper(scraper.Scraper):
           "in_stock": int(stock) > 0 if stock else False
         })
 
-      page += 1
-
       yield ScraperData(products=data["products"], progress=page/floor(total_hits / 32))
+
+      page += 1
 
   @classmethod
   async def scrape_all(cls, client: AsyncClient) -> ScraperData:

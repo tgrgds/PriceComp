@@ -26,7 +26,7 @@ async def chunk_scrape(scraper: Scraper):
 
   _starttime = time()
 
-  async with httpx.AsyncClient() as client:
+  async with httpx.AsyncClient(timeout=30) as client:
     try:
       chunk: ScraperData
       async for chunk in scraper.scrape_all(client):
