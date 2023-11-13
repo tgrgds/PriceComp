@@ -10,6 +10,7 @@ from src.prisma import prisma
 from src.auth import api_key_auth
 from src.scrapers import Scraper, SCRAPERS
 from src.type import SiteName, ScraperData
+from src.discord import error_webhook
 
 router = APIRouter()
 
@@ -74,6 +75,7 @@ async def chunk_scrape(scraper: Scraper):
       logger.error("Scraper failed due to uncaught exception!")
       logger.exception(e)
       failed = True
+      await error_webhook(scraper.id, e, client)
 
     if error_count > 0:
       logger.warn(f"{error_count} out of {batch_count} batches failed!")
