@@ -99,19 +99,23 @@ class BillyHydeScraper(scraper.Scraper):
       # with ThreadPoolExecutor(max_workers=5) as executor:
         # product_tasks = []
 
-      for k, product in enumerate(req["items"]):
+      if len(req["items"]) > 0:
+        for k, product in enumerate(req["items"]):
 
-        cls.log().info(f"({k + 1}/{page_size}) {product['name']}")
+          cls.log().info(f"({k + 1}/{page_size}) {product['name']}")
 
-        p = await cls.fetch_product_details(client, product) #asyncio.to_thread(cls.fetch_product_details, client, product)
-        if p:
-          data["products"].append(p)
-          # product_tasks.append(task)
+          p = await cls.fetch_product_details(client, product) #asyncio.to_thread(cls.fetch_product_details, client, product)
+          if p:
+            data["products"].append(p)
+            # product_tasks.append(task)
 
-        # product_results = await asyncio.gather(*product_tasks)
+          # product_results = await asyncio.gather(*product_tasks)
 
-        # data["products"] = [p for p in product_results if p]
-        # cls.log().info(f"{len(data['products'])}/{page_size} products captured.")
+          # data["products"] = [p for p in product_results if p]
+          # cls.log().info(f"{len(data['products'])}/{page_size} products captured.")
+      else:
+        cls.log().info("No more items!")
+        break
 
       
       yield ScraperData(products=data["products"], progress=page/floor(total_hits / page_size))
