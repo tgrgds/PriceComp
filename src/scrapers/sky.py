@@ -11,11 +11,6 @@ class SkyScraper(scraper.Scraper):
 
   @classmethod
   async def search_query(cls, query: str, client: AsyncClient):
-    data = {
-      "hits": 0,
-      "products": []
-    }
-
     page = 1
     total_hits = 0
 
@@ -26,6 +21,10 @@ class SkyScraper(scraper.Scraper):
     last_page_hash = ""
 
     while True:
+      data = {
+        "hits": 0,
+        "products": []
+      }
 
       params = urlencode({
         "q": query,

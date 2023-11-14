@@ -23,7 +23,7 @@ class SiteName(str, Enum):
   derringers = "derringers"
   mooloolaba = "mooloolaba"
   logans = "logans"
-  # sky = "sky"
+  sky = "sky"
   djcity = "djcity"
   mega = "mega"
   billyhyde = "billyhyde"
