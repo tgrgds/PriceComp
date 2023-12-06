@@ -48,7 +48,7 @@ async def search_products(search: str, strict: bool = False, store: Union[SiteNa
 # same as above but with specific "store" param
 # TODO: merge with above func with a query param instead
 @router.get("/product/{store}/search/{search}", dependencies=[Depends(api_key_auth)], tags=["product"])
-async def search_products(search: str, store: SiteName, strict: bool = False):
+async def search_store_products(search: str, store: SiteName, strict: bool = False):
   query = {
     "OR": [
       {
