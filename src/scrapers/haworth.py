@@ -48,12 +48,13 @@ class HaworthScraper(scraper.Scraper):
       if hits > 0:
         for product in results:
           if (product["variants"][0]["sku"] == None): continue
+
           data["products"].append({
             "name": product["title"],
             "sku": product["variants"][0]["sku"],
             "url": "https://www.haworthguitars.com.au/products/" + product["urlName"],
             "price": product["variants"][0]["price"],
-            "in_stock": product["variants"][0]["available"] == 1
+            "in_stock": product["variants"][0]["available"] > 0
           })
 
       else:

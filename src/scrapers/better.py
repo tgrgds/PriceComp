@@ -23,5 +23,5 @@ class BetterScraper(scraper.AlgoliaScraper):
       "sku": str(data["musipos"]),
       "url": data["url"],
       "price": data["price"]["AUD"]["default"],
-      "in_stock": data["in_stock"] == "In stock", # better says "Order" if not in stock
+      "in_stock": data["in_stock"] == "In-Store" or data["in_stock"] == "Online", # better says "Order" if not in stock
     }
