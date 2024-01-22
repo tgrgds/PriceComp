@@ -117,7 +117,7 @@ async def scrape_site(site_name: SiteName, background_tasks: BackgroundTasks):
 
 # List all available sites
 # Saves having to update a sitelist in cronjob lol
-@router.get("/scraper/list", dependencies=[Depends(api_key_auth)])
+@router.get("/scraper/list", dependencies=[Depends(api_key_auth)], tags=["scraper"])
 async def list_sites():
   sites = [site.value for site in SiteName]
 
@@ -125,7 +125,7 @@ async def list_sites():
 
 # Get the status of all scrapers
 # Including product count and any other useful info
-@router.get("/scraper/status", dependencies=[Depends(api_key_auth)])
+@router.get("/scraper/status", dependencies=[Depends(api_key_auth)], tags=["scraper"])
 async def scraper_status():
   data = []
 
