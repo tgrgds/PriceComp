@@ -109,6 +109,7 @@ class AlgoliaScraper(Scraper):
 
       if not req.status_code == 200:
         cls.log().warn(f"Request halted with status {req.status_code}")
+        cls.log().warn(req.text)
         break
 
       result = req.json()
