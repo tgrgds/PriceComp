@@ -41,7 +41,7 @@ async def search_products(search: str, strict: bool = False, store: Union[SiteNa
       "sku_trunc": re.sub(r'[^a-zA-Z0-9]', '', search),
     }
 
-  products = await prisma.product.find_many(where=query)
+  products = await prisma.product.find_many(where=query, order={"price": "asc"})
 
   return products
 
@@ -69,6 +69,9 @@ async def search_store_products(search: str, store: SiteName, strict: bool = Fal
     where={
       **query,
       "store_id": store
+    },
+    order={
+      "price": "asc"
     }
   )
 
