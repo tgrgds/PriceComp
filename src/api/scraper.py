@@ -22,6 +22,7 @@ async def chunk_scrape(scraper: Scraper):
   logger = logging.getLogger(scraper.id)
   batch_count = 0
   error_count = 0
+  product_count = 0
   failed = False
   progress = 0
 
@@ -64,6 +65,8 @@ async def chunk_scrape(scraper: Scraper):
                   "update": data
                 }
               )
+
+            product_count += len(chunk.products)
         # Exception when submitting batch to prisma
         except Exception as e:
           logger.error(f"Batch failed!")
@@ -92,7 +95,8 @@ async def chunk_scrape(scraper: Scraper):
       "last_scrape": datetime.now(),
       "last_scrape_duration": time() - _starttime,
       "last_scrape_failed": failed,
-      "last_scrape_progress": float(progress)
+      "last_scrape_progress": float(progress),
+      "last_scrape_count": product_count
     }
   )
 
@@ -145,7 +149,8 @@ async def scraper_status():
         "date": comp.last_scrape,
         "duration": comp.last_scrape_duration,
         "failed": comp.last_scrape_failed,
-        "progress": comp.last_scrape_progress
+        "progress": comp.last_scrape_progress,
+        "count": comp.last_scrape_count
       } if comp.last_scrape else None,
     })
   
