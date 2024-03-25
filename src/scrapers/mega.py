@@ -1,4 +1,5 @@
 from math import floor
+from json import loads
 from httpx import AsyncClient
 from bs4 import BeautifulSoup
 
@@ -46,16 +47,16 @@ class MegaScraper(scraper.Scraper):
       total_hits = int(_rcount[_rcount.find("of ")+ 3:_rcount.rfind(" ")])
 
       for card in soup.find_all("div", { "class": "type-product" }):
-        product = card.find("span", { "class": "gtm4wp_productdata" })
+        product = loads(card.find("span", { "class": "gtm4wp_productdata" })["data-gtm4wp_product_data"])
 
         stock = product.get("data-gtm4wp_product_stocklevel")
 
         data["products"].append({
           "sku": card.find("a", { "class": "button" }).get("data-product_sku"),
-          "name": product.get("data-gtm4wp_product_name"),
-          "price": product.get("data-gtm4wp_product_price"),
-          "url": product.get("data-gtm4wp_product_url"),
-          "in_stock": int(stock) > 0 if stock else False
+          "name": product["item_name"],
+          "price": product["price"],
+          "url": product["productlink"],
+          "in_stock": product["stockstatus"] == "instock"
         })
 
       yield ScraperData(products=data["products"], progress=page/floor(total_hits / 32))
